@@ -1,0 +1,103 @@
+name: RDP via Tailscale
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-rdp:
+    runs-on: windows-latest
+    # GitHub Actions hard limit is 6 hours (360 minutes) for paid/private, 
+    # and often less for free tiers. 360 is a safe maximum.
+    timeout-minutes: 360
+
+    steps:
+      - name: Enable RDP Services
+        run: |
+          # Enable Remote Desktop
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0 -Force
+          
+          # Allow RDP through Firewall
+          netsh advfirewall firewall delete rule name="RDP-Tailscale" | Out-Null
+          netsh advfirewall firewall add rule name="RDP-Tailscale" dir=in action=allow protocol=TCP localport=3389
+          
+          # Restart Service to apply registry changes
+          Restart-Service -Name TermService -Force
+          Write-Host "RDP Enabled and Firewall Updated."
+
+      - name: Create Admin User
+        run: |
+          # Generate a secure random password
+          $password = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 16 | % {[char]$_})
+          $securePass = ConvertTo-SecureString $password -AsPlainText -Force
+          
+          # Create User and add to Administrators
+          New-LocalUser -Name "RDP" -Password $securePass -Description "GitHub Runner RDP User" -AccountNeverExpires
+          Add-LocalGroupMember -Group "Administrators" -Member "RDP"
+          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "RDP"
+          
+          # Set environment variables for later steps
+          echo "RDP_USER=RDP" >> $env:GITHUB_ENV
+          echo "RDP_PASS=$password" >> $env:GITHUB_ENV
+          Write-Host "User 'RDP' created successfully."
+
+      - name: Install Tailscale
+        run: |
+          $url = "https://pkgs.tailscale.com/stable/tailscale-setup-1.82.0-amd64.msi"
+          $outFile = "$env:TEMP\tailscale.msi"
+          
+          Write-Host "Downloading Tailscale..."
+          Invoke-WebRequest -Uri $url -OutFile $outFile
+          
+          Write-Host "Installing Tailscale..."
+          $process = Start-Process msiexec.exe -ArgumentList "/i `"$outFile`" /quiet /norestart" -Wait -PassThru
+          
+          if ($process.ExitCode -ne 0) {
+              Write-Error "Tailscale installation failed with exit code $($process.ExitCode)"
+              exit 1
+          }
+          Remove-Item $outFile -Force
+
+      - name: Connect to Tailscale
+        run: |
+          $tsPath = "$env:ProgramFiles\Tailscale\tailscale.exe"
+          $hostname = "gh-runner-$env:GITHUB_RUN_ID"
+          
+          # Connect using Auth Key
+          & $tsPath up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=$hostname --accept-routes
+          
+          # Wait for IP assignment
+          $ip = $null
+          for ($i = 0; $i -lt 10; $i++) {
+              $ip = & $tsPath ip -4
+              if ($ip) { break }
+              Write-Host "Waiting for IP assignment..."
+              Start-Sleep -Seconds 5
+          }
+          
+          if (-not $ip) {
+              Write-Error "Failed to retrieve Tailscale IP."
+              exit 1
+          }
+          
+          echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
+          Write-Host "Tailscale Connected. IP: $ip"
+
+      - name: Connection Details
+        run: |
+          Write-Host "=================================================="
+          Write-Host "   RDP CONNECTION READY"
+          Write-Host "=================================================="
+          Write-Host "   IP Address:   $env:TAILSCALE_IP"
+          Write-Host "   Username:     $env:RDP_USER"
+          Write-Host "   Password:     $env:RDP_PASS"
+          Write-Host "=================================================="
+          Write-Host "   Connect via your Tailscale client and RDP."
+          Write-Host "=================================================="
+
+      - name: Keep Runner Alive
+        run: |
+          # Loop to keep the runner active until the timeout is reached
+          while ($true) {
+              Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Runner active. RDP session available..."
+              Start-Sleep -Seconds 300
+          }
