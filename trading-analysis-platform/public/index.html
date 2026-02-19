@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Analysis Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1><i class="fas fa-chart-line"></i> Trading Analysis Platform</h1>
+            <nav>
+                <ul>
+                    <li><a href="#dashboard" class="active">Dashboard</a></li>
+                    <li><a href="#analysis">AI Analysis</a></li>
+                    <li><a href="#market-data">Market Data</a></li>
+                    <li><a href="#news">News & Sentiment</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="active">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h2><i class="fas fa-wallet"></i> Account Summary</h2>
+                        <div id="account-info">
+                            <p>Loading account information...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2><i class="fas fa-sync-alt"></i> Market Prices</h2>
+                        <div id="pricing-data">
+                            <p>Loading market prices...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card wide-card">
+                        <h2><i class="fas fa-robot"></i> AI Trading Analysis</h2>
+                        <div id="ai-analysis">
+                            <p>AI analysis will appear here. The system is currently processing market data and news to generate trading recommendations.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2><i class="fas fa-newspaper"></i> Latest News</h2>
+                        <div id="news-feed">
+                            <p>Loading latest news...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2><i class="fas fa-chart-bar"></i> Trading Signals</h2>
+                        <div id="trading-signals">
+                            <p>Trading signals will appear here based on AI analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analysis Section -->
+            <section id="analysis">
+                <div class="card full-width">
+                    <h2>AI Analysis Console</h2>
+                    <div class="analysis-controls">
+                        <button id="run-analysis"><i class="fas fa-play"></i> Run Analysis</button>
+                        <select id="analysis-type">
+                            <option value="forex">Forex Analysis</option>
+                            <option value="crypto">Crypto Analysis</option>
+                            <option value="futures">Futures Analysis</option>
+                        </select>
+                        <input type="text" id="instrument-input" placeholder="Enter instrument (e.g. EUR_USD)" value="EUR_USD">
+                    </div>
+                    <div id="analysis-output">
+                        <h3>Analysis Process:</h3>
+                        <div id="analysis-steps">
+                            <p>Click "Run Analysis" to begin the AI-driven trading analysis process.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Market Data Section -->
+            <section id="market-data">
+                <div class="card full-width">
+                    <h2>Real-Time Market Data</h2>
+                    <div class="market-controls">
+                        <input type="text" id="symbol-search" placeholder="Search for symbol (e.g. EUR_USD, XAU_USD, BTC_USD)">
+                        <button id="fetch-market-data"><i class="fas fa-search"></i> Fetch Data</button>
+                    </div>
+                    <div id="market-display">
+                        <div id="price-chart-container">
+                            <canvas id="price-chart"></canvas>
+                        </div>
+                        <div id="market-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Instrument</th>
+                                        <th>Bid</th>
+                                        <th>Ask</th>
+                                        <th>Spread</th>
+                                        <th>Direction</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="market-tbody">
+                                    <tr><td colspan="5">Loading market data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- News Section -->
+            <section id="news">
+                <div class="card full-width">
+                    <h2>Financial News & Sentiment Analysis</h2>
+                    <div class="news-controls">
+                        <input type="text" id="news-search" placeholder="Search for news topics">
+                        <button id="fetch-news"><i class="fas fa-sync"></i> Refresh News</button>
+                    </div>
+                    <div id="news-container">
+                        <div id="news-list">
+                            <p>Loading financial news...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings">
+                <div class="card full-width">
+                    <h2>Platform Settings</h2>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="api-key">OANDA API Key:</label>
+                            <input type="password" id="api-key" placeholder="Enter your OANDA API key">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="account-id">Account ID:</label>
+                            <input type="text" id="account-id" placeholder="Enter your OANDA account ID">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="risk-level">Risk Level:</label>
+                            <select id="risk-level">
+                                <option value="low">Low Risk</option>
+                                <option value="medium" selected>Medium Risk</option>
+                                <option value="high">High Risk</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="notification-settings">Notification Settings:</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="email-notifications" checked> Email Notifications</label>
+                                <label><input type="checkbox" id="push-notifications" checked> Push Notifications</label>
+                                <label><input type="checkbox" id="sms-notifications"> SMS Notifications</label>
+                            </div>
+                        </div>
+                        
+                        <button id="save-settings"><i class="fas fa-save"></i> Save Settings</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
